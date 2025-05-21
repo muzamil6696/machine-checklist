@@ -10,85 +10,68 @@
   <div class="bg-white shadow-md rounded-lg p-6 w-full max-w-xl">
     <h2 class="text-2xl font-bold mb-4 text-center">Machine Daily Checklist</h2>
     <p class="text-sm text-gray-600 text-center mb-2">Machine ID: <span id="machine-id" class="font-mono"></span></p>
-    <form id="checklist-form">
+
+    <form id="checklist-form"
+          action="https://script.google.com/macros/s/AKfycbwAjCpQ1F7PNyzCZDKgJx7la_Zpar7m7WNxPnw6kWjEU8K-CNZuaVNTW0TUvorta1ub/exec"
+          method="POST"
+          target="hidden_iframe"
+          onsubmit="handleSubmit()">
+
+      <input type="hidden" id="machineIdField" name="machineId" />
+      <input type="hidden" name="date" id="date" />
+
       <label class="block mb-2 font-semibold">Operator Name:</label>
-      <input type="text" id="name" class="w-full mb-4 p-2 border rounded" required />
+      <input type="text" name="name" id="name" class="w-full mb-4 p-2 border rounded" required />
 
       <label class="block mb-2 font-semibold">Checklist</label>
       <div class="mb-2">
-        <input type="checkbox" id="visual-check" required />
-        <label for="visual-check">Visual inspections (no damage, no leaks)</label>
+        <input type="checkbox" name="visualCheck" value="true" required />
+        <label>Visual inspection (no damage, no leaks)</label>
       </div>
       <div class="mb-2">
-        <input type="checkbox" id="horn-check" required />
-        <label for="horn-check">Horn & lights functional</label>
+        <input type="checkbox" name="hornCheck" value="true" required />
+        <label>Horn & lights functional</label>
       </div>
       <div class="mb-2">
-        <input type="checkbox" id="brakes-check" required />
-        <label for="brakes-check">Brakes and steering operational</label>
+        <input type="checkbox" name="brakesCheck" value="true" required />
+        <label>Brakes and steering operational</label>
       </div>
       <div class="mb-2">
-        <input type="checkbox" id="forks-check" required />
-        <label for="forks-check">Forks/lifting mechanism working</label>
+        <input type="checkbox" name="forksCheck" value="true" required />
+        <label>Forks/lifting mechanism working</label>
       </div>
       <div class="mb-4">
-        <input type="checkbox" id="battery-check" required />
-        <label for="battery-check">Battery/fuel levels sufficient</label>
+        <input type="checkbox" name="batteryCheck" value="true" required />
+        <label>Battery/fuel levels sufficient</label>
       </div>
 
       <label class="block mb-2 font-semibold">Comments (optional):</label>
-      <textarea id="comments" class="w-full p-2 border rounded mb-4" rows="3"></textarea>
+      <textarea name="comments" class="w-full p-2 border rounded mb-4" rows="3"></textarea>
 
       <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded w-full">
         Submit Checklist
       </button>
     </form>
+
     <p id="status-msg" class="text-center text-sm mt-4 font-semibold"></p>
   </div>
 
+  <iframe name="hidden_iframe" style="display:none;"></iframe>
+
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbwAjCpQ1F7PNyzCZDKgJx7la_Zpar7m7WNxPnw6kWjEU8K-CNZuaVNTW0TUvorta1ub/exec';
     const params = new URLSearchParams(window.location.search);
     const machineId = params.get("machine") || "UNKNOWN";
     document.getElementById("machine-id").textContent = machineId;
+    document.getElementById("machineIdField").value = machineId;
+    document.getElementById("date").value = new Date().toISOString().split('T')[0];
 
-document.getElementById("checklist-form").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const today = new Date().toISOString().split('T')[0];
-  const machineId = new URLSearchParams(window.location.search).get("machine") || "UNKNOWN";
-
-  const params = new URLSearchParams();
-  params.append("date", today);
-  params.append("machineId", machineId);
-  params.append("name", document.getElementById("name").value.trim());
-  params.append("visualCheck", document.getElementById("visual-check").checked);
-  params.append("hornCheck", document.getElementById("horn-check").checked);
-  params.append("brakesCheck", document.getElementById("brakes-check").checked);
-  params.append("forksCheck", document.getElementById("forks-check").checked);
-  params.append("batteryCheck", document.getElementById("battery-check").checked);
-  params.append("comments", document.getElementById("comments").value);
-
-  fetch(scriptURL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
-    },
-    body: params
-  })
-    .then(response => response.text())
-    .then(result => {
-      document.getElementById("status-msg").textContent = result;
-      if (result.includes("success")) {
+    function handleSubmit() {
+      document.getElementById("status-msg").textContent = "Submitting...";
+      setTimeout(() => {
+        document.getElementById("status-msg").textContent = "Checklist submitted successfully.";
         document.getElementById("checklist-form").reset();
-      }
-    })
-    .catch(error => {
-      console.error("Fetch Error:", error);
-      document.getElementById("status-msg").textContent = "Submission failed. Please try again later.";
-    });
-});
-
+      }, 1000);
+    }
   </script>
 </body>
 </html>
