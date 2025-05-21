@@ -52,38 +52,43 @@
     const machineId = params.get("machine") || "UNKNOWN";
     document.getElementById("machine-id").textContent = machineId;
 
-    document.getElementById("checklist-form").addEventListener("submit", function (e) {
-      e.preventDefault();
+document.getElementById("checklist-form").addEventListener("submit", function (e) {
+  e.preventDefault();
 
-      const today = new Date().toISOString().split('T')[0];
-      const formData = new FormData();
-      formData.append("date", today);
-      formData.append("machineId", machineId);
-      formData.append("name", document.getElementById("name").value.trim());
-      formData.append("visualCheck", document.getElementById("visual-check").checked);
-      formData.append("hornCheck", document.getElementById("horn-check").checked);
-      formData.append("brakesCheck", document.getElementById("brakes-check").checked);
-      formData.append("forksCheck", document.getElementById("forks-check").checked);
-      formData.append("batteryCheck", document.getElementById("battery-check").checked);
-      formData.append("comments", document.getElementById("comments").value);
+  const today = new Date().toISOString().split('T')[0];
+  const machineId = new URLSearchParams(window.location.search).get("machine") || "UNKNOWN";
 
-      fetch(scriptURL, {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-  body: new URLSearchParams(formData)
-})
-        .then(response => response.text())
-        .then(result => {
-          document.getElementById("status-msg").textContent = result;
-          if (result.includes("success")) {
-            document.getElementById("checklist-form").reset();
-          }
-        })
-        .catch(error => {
-          console.error('Error!', error.message);
-          document.getElementById("status-msg").textContent = "Submission failed. Please try again later.";
-        });
+  const params = new URLSearchParams();
+  params.append("date", today);
+  params.append("machineId", machineId);
+  params.append("name", document.getElementById("name").value.trim());
+  params.append("visualCheck", document.getElementById("visual-check").checked);
+  params.append("hornCheck", document.getElementById("horn-check").checked);
+  params.append("brakesCheck", document.getElementById("brakes-check").checked);
+  params.append("forksCheck", document.getElementById("forks-check").checked);
+  params.append("batteryCheck", document.getElementById("battery-check").checked);
+  params.append("comments", document.getElementById("comments").value);
+
+  fetch(scriptURL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded'
+    },
+    body: params
+  })
+    .then(response => response.text())
+    .then(result => {
+      document.getElementById("status-msg").textContent = result;
+      if (result.includes("success")) {
+        document.getElementById("checklist-form").reset();
+      }
+    })
+    .catch(error => {
+      console.error("Fetch Error:", error);
+      document.getElementById("status-msg").textContent = "Submission failed. Please try again later.";
     });
+});
+
   </script>
 </body>
 </html>
